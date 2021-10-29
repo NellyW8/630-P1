@@ -20,10 +20,3 @@ rrcFilter = rcosdesign(rolloff,span,sps);
 X1 = upfirdn(X,rrcFilter,sps);
 S = lowpass(X1,pi/16);
 
-% section 2
-in = ones(size(S));
-out = awgn(in,10,'measured');
-size(out,2)
-for i = 1:size(out,2)
-    out(i) = out(i)-1;
-end
