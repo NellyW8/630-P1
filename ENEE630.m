@@ -20,3 +20,4 @@ rrcFilter = rcosdesign(rolloff,span,sps);
 X1 = upfirdn(X,rrcFilter,sps);
 S = lowpass(X1,pi/16);
 
+s
