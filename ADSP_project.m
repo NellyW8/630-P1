@@ -71,7 +71,7 @@ dft_delay2=dft_delay-41;
 signal_rec=zeros(800,1);
 signal_rec_ori=zeros(800,1);
 for k=1:800
-    signal_rec(k)=exp(-2*pi*(f_est)*k*1i/16000)*signal_r2(k+40+dft_delay2,1);     %some problem about the formulas given by teacher
+    signal_rec(k)=exp(-2*pi*(f_est)*(k+40)*1i/16000)*signal_r2(k+40+dft_delay2,1);     %some problem about the formulas given by teacher
     signal_rec_ori(k)=(1-signal_rec(k))/2;
 end
 
