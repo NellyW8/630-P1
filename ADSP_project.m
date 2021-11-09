@@ -69,13 +69,10 @@ end
 % Estimate the frequency and the time delay
 
 dft_f=(dft_f-1)*16000/128;
-%f_est=dft_f(1,1);
-%The estimation of the frequency uncertainty that you enters into the
-%fuction "AWGN_channel"
-%f_est_t=f_est-2000;
 [~,dft_delay]=max(dft_max);
 dft_delay2=dft_delay-41;
 f_est=dft_f(dft_delay,1);
+%The frequency uncertainty that you enter into the channel
 f_est_t=f_est-2000;
 
 %Recover the signal
