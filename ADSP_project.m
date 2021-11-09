@@ -32,7 +32,7 @@ signal_s=conv(signal_mod_up,rrc_filter);
 % output=AWGN_channel(signal_s,time delay,frequency uncertainty,phase uncertainty,SNR)
 % The input time delay in discrete time domain, from -640 points to 640
 % points
-signal_r=AWGN_channel(signal_s,-640,1500,0,100);
+signal_r=AWGN_channel(signal_s,0,0,0,100);
 
 % Pass the signal through the LPF filter:RRC filter
 signal_r1=conv(signal_r,rrc_filter);
