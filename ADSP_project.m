@@ -130,5 +130,7 @@ end
 
 signal_r=awgn(signal_r,noise);
 
+end
+
 
 
