@@ -1,5 +1,11 @@
-%The Generation of 800 bits signal,which contains CW signal-128 bits,key 8
-%bits and 664 bits random signal
+% Running the system needs to install communications box of Matlab
+%The time of the signal is 50 msec
+%Before running the code,youou need to type in the frequency uncertainty and time delay into the function "AWGN_channel" when using the code
+%The time dffset ranges from -2.5 msec to 2.5 sec,so "time delay"ranges from -640 points to 640 points
+%The range of frequency uncertainty is -1500 Hz to 1500 Hz
+%Now the code shows a situation in which time delay and frequency uncertainty is zero, SNR is 100 dB
+%The Generation of 800 bits signal,which contains CW signal-128 bits,key 8 bits and 664 bits random signal
+
 for loop=1:100
 
 cw_signal=ones(128,1);
@@ -24,6 +30,7 @@ signal_mod_up=upsample(signal_mod,16);
 signal_s=conv(signal_mod_up,rrc_filter);
 
 % AWGN Channel This part needs to install coomunications toolbox.
+% output=AWGN_channel(signal_s,time delay,frequency uncertainty,phase uncertainty,SNR)
 signal_r=AWGN_channel(signal_s,0,0,0,1);
 
 % Pass the signal through the LPF filter:RRC filter
@@ -105,13 +112,23 @@ fer_l(loop,1)=fer;
 clearvars -except time_delay e_fre ber_l fer_l loop
 end
 
+%Calculate the average of estimation, BER and FER of the 100 times circle
+mean_delay=mean(time_delay);
+mean_f=mean(e_fre);
 mean_ber=mean(ber_l);
 mean_fer=mean(fer_l);
 
+function signal_r=AWGN_channel(s,delay,frequency,phase,noise)
 
+len=length(s);
+signal_delay=[zeros(640,1);s;zeros(640,1)];
+signal_r=zeros(len+1280,1);
 
+for k=(641+delay):(length(s)+640+delay)
+    signal_r(k)=exp(phase*1i)*exp(2*pi*frequency*k*1i/(16*16000))*signal_delay(k-delay,1);   
+end
 
-
+signal_r=awgn(signal_r,noise);
 
 
 
