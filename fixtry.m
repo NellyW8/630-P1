@@ -62,6 +62,7 @@ signal_r2=downsample(signal_fix_r1,16,0);
 dft_max=zeros(84,1);
 dft_f=zeros(84,1);
 
+%Need to rewirte the function getabs in function dftmax
 fiaccel dftmax -args {signal_r2} -report -o dftmax_mex
 [dft_max1,dft_f1]=dftmax_mex(signal_r2);
 
