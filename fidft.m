@@ -11,7 +11,7 @@ for k=5:29
         local=SHIFT(local,15);
         y(k-4,1)=ADD32(y(k-4,1),local);
         elseif ((mod((k-1)*(m-1),128)<=64))&&((mod((k-1)*(m-1),128)>32))
-        local=ADD32(MUL16(x(m,1),dftcof(mod((k-1)*(m-1),128)+1,1)),MUL16(x(m,2),dftcof(97-mod((k-1)*(m-1),128),1)));
+        local=ADD32(MUL16(x(m,1),dftcof(mod((k-1)*(m-1),128)+1,1)),MUL16(x(m,2),-dftcof(97-mod((k-1)*(m-1),128),1)));
         local=SHIFT(local,15);
         y(k-4,1)=ADD32(y(k-4,1),local);
         elseif (mod((k-1)*(m-1),128)<=96)&&(mod((k-1)*(m-1),128)>64)
@@ -19,7 +19,7 @@ for k=5:29
         local=SHIFT(local,15);
         y(k-4,1)=ADD32(y(k-4,1),local);
         else
-        local=ADD32(MUL16(x(m,1),dftcof(mod((k-1)*(m-1),128)+1,1)),MUL16(x(m,2),dftcof(225-mod((k-1)*(m-1),128),1)));
+        local=ADD32(MUL16(x(m,1),dftcof(mod((k-1)*(m-1),128)+1,1)),MUL16(x(m,2),-dftcof(225-mod((k-1)*(m-1),128),1)));
         local=SHIFT(local,15);
         y(k-4,1)=ADD32(y(k-4,1),local);
         end
@@ -33,7 +33,7 @@ for k=5:29
         local=SHIFT(local,15);
         y(k-4,2)=ADD32(y(k-4,2),local);
         elseif (mod((k-1)*(m-1),128)<=64)&&(mod((k-1)*(m-1),128)>32)
-        local=SUB32(MUL16(x(m,2),dftcof(mod((k-1)*(m-1),128)+1,1)),MUL16(x(m,1),dftcof(97-mod((k-1)*(m-1),128),1)));
+        local=SUB32(MUL16(x(m,2),dftcof(mod((k-1)*(m-1),128)+1,1)),MUL16(x(m,1),-dftcof(97-mod((k-1)*(m-1),128),1)));
         local=SHIFT(local,15);
         y(k-4,2)=ADD32(y(k-4,2),local);
         elseif (mod((k-1)*(m-1),128)<=96)&&(mod((k-1)*(m-1),128)>64)
@@ -41,7 +41,7 @@ for k=5:29
         local=SHIFT(local,15);
         y(k-4,2)=ADD32(y(k-4,2),local);
         else
-        local=SUB32(MUL16(x(m,2),dftcof(mod((k-1)*(m-1),128)+1,1)),MUL16(x(m,1),dftcof(225-mod((k-1)*(m-1),128),1)));
+        local=SUB32(MUL16(x(m,2),dftcof(mod((k-1)*(m-1),128)+1,1)),MUL16(x(m,1),-dftcof(225-mod((k-1)*(m-1),128),1)));
         local=SHIFT(local,15);
         y(k-4,2)=ADD32(y(k-4,2),local);
         end
