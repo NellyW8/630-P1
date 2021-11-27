@@ -31,7 +31,7 @@ signal_s=conv(signal_mod_up,rrc_filter);
 % AWGN Channel This part needs to install coomunications toolbox.
 % output=AWGN_channel(signal_s,time delay,frequency uncertainty,phase uncertainty,SNR)
 %The time dffset ranges from -2.5 msec to 2.5 sec;The range of frequency uncertainty is -1500 Hz to 1500 Hz
-signal_r=AWGN_channel(signal_s,0.0625,0,0,100);
+signal_r=AWGN_channel(signal_s,0.0625,1500,0,100);
 
 %A/D converter-Transfer the received signal to fixed point data
 for j=1:length(signal_r)
@@ -62,7 +62,6 @@ signal_r2=downsample(signal_fix_r1,16,0);
 dft_max=zeros(84,1);
 dft_f=zeros(84,1);
 
-%Need to rewirte the function getabs in function dftmax
 fiaccel dftmax -args {signal_r2} -report -o dftmax_mex
 [dft_max1,dft_f1]=dftmax_mex(signal_r2);
 
@@ -74,8 +73,12 @@ f_est_t1=f_est1-2000;
 
 
 for j=1:84
-    signal_dft=fft(signal_r2(j:j+127),128);
-    [dft_max(j),dft_f(j)]=max(abs(signal_dft));
+    signal_dft_1=fft(signal_r2(j:j+127,1),128);
+    signal_dft_2=fft(signal_r2(j:j+127,2),128);
+    fft_re=real(signal_dft_1)-imag(signal_dft_2);
+    fft_im=imag(signal_dft_1)+real(signal_dft_2);
+    fft_com=fft_re+1i*fft_im;
+    [dft_max(j),dft_f(j)]=max(abs(fft_com));
 end
 
 dft_f=(dft_f-1)*16000/128;
@@ -86,13 +89,32 @@ f_est_t=f_est-2000;
 
 
 %Recover the signal
-signal_rec=zeros(800,1);
-signal_rec_ori=zeros(800,1);
+saveco=open('matlab.mat');
+savcos=saveco.cosc;
+savsin=saveco.sinc;
+
+fiaccel signal_rec -args {signal_r2,dft_delay3,savcos,savsin,f_est_t1} -report -o signal_rec_mex
+signal_recovery=signal_rec_mex(signal_r2,dft_delay3,savcos,savsin,f_est_t1);
+
+%Calculate bit error rate and frame error rate
+%Transfer the signal to the 0-1 form
 for k=1:800
-    signal_rec(k)=exp((-2*pi*f_est_t*(k+40+dft_delay2)*1i)/16000)*signal_r2(k+40+dft_delay2,1);
-    signal_rec(k)=exp((-2*pi*2000*k*1i)/16000)*signal_rec(k,1);
+    if (signal_recovery(k,1)<0)
+        signal_dec(k,1)=1;
+    else
+        signal_dec(k,1)=0;
+    end
 end
 
+%Calculate BER
+[number,ber]=biterr(signal_input,signal_dec);
+
+% Calculate FER
+if number==0
+    fer=0;
+else
+    fer=1;
+end
 
 
 
