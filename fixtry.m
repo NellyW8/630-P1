@@ -4,10 +4,18 @@
 %The time dffset ranges from -2.5 msec to 2.5 sec
 %The range of frequency uncertainty is -1500 Hz to 1500 Hz
 %Now the code shows a situation in which time delay and frequency uncertainty is zero, SNR is 100 dB
+%Running the code needs to download the file "matlab.format" in the file
+%folder
+%Running the code needs to install the "Fixed-point designer"
 
 %The Generation of 800 bits signal,which contains CW signal-128 bits,key 8-bits and 664 bits random signal
 clear
+time_delay_d=linspace(-2.5,2.5,81);
+frequency_uncertainty=linspace(-1500,1500,25);
+SNR_d=linspace(-3,15,37);
 
+for loop1=1:length(SNR_d)
+for loop=1:100
 cw_signal=ones(128,1);
 key_signal=zeros(8,1);
 content_signal=randi([0 1],664,1);
@@ -31,7 +39,7 @@ signal_s=conv(signal_mod_up,rrc_filter);
 % AWGN Channel This part needs to install coomunications toolbox.
 % output=AWGN_channel(signal_s,time delay,frequency uncertainty,phase uncertainty,SNR)
 %The time dffset ranges from -2.5 msec to 2.5 sec;The range of frequency uncertainty is -1500 Hz to 1500 Hz
-signal_r=AWGN_channel(signal_s,0.0625,1500,0,100);
+signal_r=AWGN_channel(signal_s,0,0,0,SNR_d(loop1));
 
 %A/D converter-Transfer the received signal to fixed point data
 for j=1:length(signal_r)
@@ -53,39 +61,24 @@ datasize=int16(length(signal_fixr1));
 % Pass the signal through the LPF filter:RRC filter
 signal_fix_r1=fixedfilter(signal_fixr1,datasize);
 % Find the correct sampling time index_s using energy method
+%fiaccel sampletime -args {signal_fix_r1} -report -o sampletime_mex
+%index_s=sampletime(signal_fix_r1);
+%index_s=index_s-1;
 % Start downsampling from index_s
 signal_r2=downsample(signal_fix_r1,16,0);
 
 %Using 128 point fixed-point DFT to get the time delay and frequency
 %Choose 128 point of the signal and change the choice
 %don't need to calculate the whole span of DFT
-dft_max=zeros(84,1);
-dft_f=zeros(84,1);
 
 fiaccel dftmax -args {signal_r2} -report -o dftmax_mex
 [dft_max1,dft_f1]=dftmax_mex(signal_r2);
 
 dft_f1=(dft_f1-1+4)*16000/128;
 [~,dft_delay1]=max(dft_max1);
-dft_delay3=dft_delay1-44;
+dft_delay3=int16(dft_delay1-44);
 f_est1=dft_f1(dft_delay1,1);
-f_est_t1=f_est1-2000;
-
-
-for j=1:84
-    signal_dft_1=fft(signal_r2(j:j+127,1),128);
-    signal_dft_2=fft(signal_r2(j:j+127,2),128);
-    fft_re=real(signal_dft_1)-imag(signal_dft_2);
-    fft_im=imag(signal_dft_1)+real(signal_dft_2);
-    fft_com=fft_re+1i*fft_im;
-    [dft_max(j),dft_f(j)]=max(abs(fft_com));
-end
-
-dft_f=(dft_f-1)*16000/128;
-[~,dft_delay]=max(dft_max);
-dft_delay2=dft_delay-44;
-f_est=dft_f(dft_delay,1);
-f_est_t=f_est-2000;
+f_est_t1=int16(f_est1-2000);
 
 
 %Recover the signal
@@ -98,11 +91,11 @@ signal_recovery=signal_rec_mex(signal_r2,dft_delay3,savcos,savsin,f_est_t1);
 
 %Calculate bit error rate and frame error rate
 %Transfer the signal to the 0-1 form
-for k=1:800
+for k=int16(1):int16(800)
     if (signal_recovery(k,1)<0)
-        signal_dec(k,1)=1;
+        signal_dec(k,1)=int16(1);
     else
-        signal_dec(k,1)=0;
+        signal_dec(k,1)=int16(0);
     end
 end
 
@@ -115,6 +108,22 @@ if number==0
 else
     fer=1;
 end
+
+%save data from this frame
+time_delay(loop,1)=double(dft_delay3)/800*50;
+e_fre(loop,1)=f_est_t1;
+ber_l(loop,1)=ber;
+fer_l(loop,1)=fer;
+
+%clearvars -except time_delay e_fre ber_l fer_l loop mean_delay mean_f mean_ber mean_fer signal_rec
+end
+avg_delay(loop1,1)=mean(time_delay);
+avg_fre(loop1,1)=mean(e_fre);
+avg_bre(loop1,1)=mean(ber_l);
+avg_fer(loop1,1)=mean(fer_l);
+
+end
+
 
 
 
@@ -133,7 +142,7 @@ Filterscale=int16(7);
 Intemp=zeros(datasize+Filsize-1,2,'int16');
 
 
-for i=1:datasize
+for i=int16(1):int16(datasize)
     Intemp(i+Fildelay,1)=input(i,1);
     Intemp(i+Fildelay,2)=input(i,2);
 end
