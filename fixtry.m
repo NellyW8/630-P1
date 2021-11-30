@@ -4,18 +4,13 @@
 %The time dffset ranges from -2.5 msec to 2.5 sec
 %The range of frequency uncertainty is -1500 Hz to 1500 Hz
 %Now the code shows a situation in which time delay and frequency uncertainty is zero, SNR is 100 dB
-%Running the code needs to download the file "matlab.format" in the file
+%Running the code needs to download the file "matlab.mat" in the file
 %folder
-%Running the code needs to install the "Fixed-point designer"
+%Running the code needs to install the "Fixed-Point Designer"
 
 %The Generation of 800 bits signal,which contains CW signal-128 bits,key 8-bits and 664 bits random signal
 clear
-time_delay_d=linspace(-2.5,2.5,81);
-frequency_uncertainty=linspace(-1500,1500,25);
-SNR_d=linspace(-3,15,37);
 
-for loop1=1:length(SNR_d)
-for loop=1:100
 cw_signal=ones(128,1);
 key_signal=zeros(8,1);
 content_signal=randi([0 1],664,1);
@@ -39,7 +34,7 @@ signal_s=conv(signal_mod_up,rrc_filter);
 % AWGN Channel This part needs to install coomunications toolbox.
 % output=AWGN_channel(signal_s,time delay,frequency uncertainty,phase uncertainty,SNR)
 %The time dffset ranges from -2.5 msec to 2.5 sec;The range of frequency uncertainty is -1500 Hz to 1500 Hz
-signal_r=AWGN_channel(signal_s,0,0,0,SNR_d(loop1));
+signal_r=AWGN_channel(signal_s,0,0,0,100);
 
 %A/D converter-Transfer the received signal to fixed point data
 for j=1:length(signal_r)
@@ -61,11 +56,11 @@ datasize=int16(length(signal_fixr1));
 % Pass the signal through the LPF filter:RRC filter
 signal_fix_r1=fixedfilter(signal_fixr1,datasize);
 % Find the correct sampling time index_s using energy method
-%fiaccel sampletime -args {signal_fix_r1} -report -o sampletime_mex
-%index_s=sampletime(signal_fix_r1);
-%index_s=index_s-1;
+fiaccel sampletime -args {signal_fix_r1} -report -o sampletime_mex
+index_s=sampletime(signal_fix_r1);
+index_s=index_s-1;
 % Start downsampling from index_s
-signal_r2=downsample(signal_fix_r1,16,0);
+signal_r2=downsample(signal_fix_r1,16,index_s);
 
 %Using 128 point fixed-point DFT to get the time delay and frequency
 %Choose 128 point of the signal and change the choice
@@ -110,19 +105,10 @@ else
 end
 
 %save data from this frame
-time_delay(loop,1)=double(dft_delay3)/800*50;
-e_fre(loop,1)=f_est_t1;
-ber_l(loop,1)=ber;
-fer_l(loop,1)=fer;
-
-%clearvars -except time_delay e_fre ber_l fer_l loop mean_delay mean_f mean_ber mean_fer signal_rec
-end
-avg_delay(loop1,1)=mean(time_delay);
-avg_fre(loop1,1)=mean(e_fre);
-avg_bre(loop1,1)=mean(ber_l);
-avg_fer(loop1,1)=mean(fer_l);
-
-end
+time_delay(1,1)=double(dft_delay3)/800*50;
+e_fre(1,1)=f_est_t1;
+ber_l(1,1)=ber;
+fer_l(1,1)=fer;
 
 
 
